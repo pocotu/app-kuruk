@@ -1,0 +1,57 @@
+---
+import type { Producto } from '../lib/api';
+import Aviso from './Aviso.astro';
+import Campo from './Campo.astro';
+
+// Formulario de producto para "nuevo" y "editar". Si un envío falló muestra lo enviado;
+// si no, el producto guardado o los valores por defecto.
+interface Props {
+  enviado: Record<string, string> | null;
+  producto?: Producto;
+  errores: Record<string, string>;
+  error: string | null;
+  boton: string;
+}
+
+const { enviado, producto, errores, error, boton } = Astro.props;
+
+const valores = enviado
+  ? { ...enviado, compatible_starlink: 'compatible_starlink' in enviado }
+  : {
+      nombre: producto?.nombre ?? '',
+      categoria: producto?.categoria ?? 'Celular',
+      precio: producto ? producto.precio.toFixed(2) : '',
+      stock: producto ? String(producto.stock) : '1',
+      oferta: producto?.oferta ?? '',
+      compatible_starlink: producto?.compatible_starlink ?? true,
+    };
+
+const categorias = ['Celular', 'Conectividad', 'Accesorios'].map((c) => ({ value: c, label: c }));
+---
+
+<form method="POST" novalidate class="card space-y-5 p-5 sm:p-6">
+  {error && <Aviso tipo="error">{error}</Aviso>}
+
+  <Campo etiqueta="Nombre del equipo" name="nombre" required value={valores.nombre} error={errores.nombre} placeholder="Ej. Starlink Mini" />
+  <Campo etiqueta="Categoría" name="categoria" required value={valores.categoria} error={errores.categoria} opciones={categorias} />
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <Campo etiqueta="Precio (S/)" name="precio" type="number" inputmode="decimal" min="0.01" step="0.01" required value={valores.precio} error={errores.precio} placeholder="1899.00" />
+    <Campo etiqueta="Stock" name="stock" type="number" inputmode="numeric" min="0" step="1" required value={valores.stock} error={errores.stock} />
+  </div>
+
+  <Campo etiqueta="Oferta vigente" name="oferta" value={valores.oferta} ayuda="Opcional. Se muestra en el catálogo." placeholder="Ej. Case y cargador gratis" />
+
+  <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50">
+    <input type="checkbox" name="compatible_starlink" checked={valores.compatible_starlink} class="mt-0.5 size-5 accent-accent" />
+    <span>
+      <span class="block text-[15px] font-medium">Compatible con Starlink</span>
+      <span class="block text-[14px] text-stone-600">Muestra el distintivo verde en el catálogo.</span>
+    </span>
+  </label>
+
+  <div class="form-acciones">
+    <a href="/gestion" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">{boton}</button>
+  </div>
+</form>

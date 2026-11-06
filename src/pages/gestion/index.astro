@@ -1,97 +1,43 @@
 ---
-import { db, Productos } from 'astro:db';
+import Cabecera from '../../components/Cabecera.astro';
+import Starlink from '../../components/Starlink.astro';
+import Stock from '../../components/Stock.astro';
 import App from '../../layouts/App.astro';
-import {
-  calcularNivelStock,
-  claseBadgeStock,
-  codigoProducto,
-  formatearSoles,
-} from '../../lib/formato';
+import { leer, type Producto } from '../../lib/api';
+import { codigoProducto, formatearSoles } from '../../lib/formato';
 
-const usuario = Astro.locals.user;
-if (!usuario || usuario.rol !== 'Administrador') {
-  return Astro.redirect('/?error=acceso_denegado');
-}
-
-const listaProductos = await db.select().from(Productos);
-const mensajeParam = Astro.url.searchParams.get('mensaje');
-
-let textoExito: string | null = null;
-if (mensajeParam === 'creado') {
-  textoExito = 'Producto creado correctamente.';
-} else if (mensajeParam === 'actualizado') {
-  textoExito = 'Producto actualizado correctamente.';
-}
+const productos = (await leer<Producto[]>(Astro.cookies, '/productos')) ?? [];
 ---
 
-<App titulo="Gestión de catálogo" seccion="gestion">
-  <div class="mb-4 flex items-center justify-between gap-2">
-    <div>
-      <h1 class="text-xl font-bold text-slate-900">Gestión de productos</h1>
-      <p class="text-xs text-slate-600">
-        Panel exclusivo de Administrador · Precios, stock y ofertas
-      </p>
-    </div>
-    <a
-      href="/gestion/productos/nuevo"
-      class="inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700"
-    >
-      + Nuevo producto
-    </a>
-  </div>
+<App titulo="Gestión" seccion="gestion">
+  <Cabecera titulo="Gestión de productos" descripcion="Precios, stock y ofertas del catálogo.">
+    <a href="/gestion/productos/nuevo" class="btn btn-primary">Nuevo producto</a>
+  </Cabecera>
 
-  {textoExito && (
-    <div
-      role="status"
-      class="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm font-semibold text-emerald-900"
-    >
-      {textoExito}
-    </div>
-  )}
-
-  <div class="space-y-3">
-    {listaProductos.map((p) => {
-      const nivel = calcularNivelStock(p.stock);
-      return (
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-1.5">
-              <span class="font-mono text-xs font-semibold text-slate-500">
-                {codigoProducto(p.id)}
-              </span>
-              <span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                {p.categoria}
-              </span>
-              {p.compatible_starlink && (
-                <span class="rounded border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-900">
-                  ● Starlink
-                </span>
-              )}
-              <span
-                class:list={[
-                  'rounded border px-2 py-0.5 text-xs font-bold',
-                  claseBadgeStock(nivel),
-                ]}
-              >
-                {nivel}: {p.stock} u.
-              </span>
+  <ul class="card divide-y divide-stone-200 overflow-hidden">
+    {
+      productos.map((p) => (
+        <li>
+          <a href={`/gestion/productos/${p.id}`} class="fila" aria-label={`Editar ${p.nombre}`}>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <p class="text-[15px] font-medium">{p.nombre}</p>
+                {p.compatible_starlink && <Starlink />}
+              </div>
+              <p class="mt-0.5 text-[13px] text-stone-500">
+                {p.categoria} · <span class="font-mono">{codigoProducto(p.id)}</span>{p.oferta && ` · ${p.oferta}`}
+              </p>
             </div>
-
-            <h2 class="mt-1 text-base font-bold text-slate-900">{p.nombre}</h2>
-            <p class="text-xs text-slate-600">
-              Precio: <strong class="text-slate-900">{formatearSoles(p.precio)}</strong>
-              {p.oferta ? ` · Oferta: ${p.oferta}` : ''}
-            </p>
-          </div>
-
-          <a
-            href={`/gestion/productos/${p.id}`}
-            class="inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100"
-          >
-            Editar
+            <div class="flex shrink-0 flex-col items-end gap-1">
+              <span class="text-[15px] font-semibold tabular-nums">{formatearSoles(p.precio)}</span>
+              <Stock producto={p} />
+            </div>
+            <svg class="size-5 shrink-0 text-stone-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.2 4.2a.75.75 0 0 1 1.06 0l5.27 5.27a.75.75 0 0 1 0 1.06L8.26 15.8a.75.75 0 1 1-1.06-1.06L11.94 10 7.2 5.26a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
           </a>
-        </div>
-      );
-    })}
-  </div>
+        </li>
+      ))
+    }
+  </ul>
 </App>

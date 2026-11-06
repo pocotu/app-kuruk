@@ -1,0 +1,19 @@
+---
+interface Props {
+  tipo: 'exito' | 'error' | 'aviso';
+}
+
+const { tipo } = Astro.props;
+const estilos = {
+  exito: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  error: 'border-red-200 bg-red-50 text-red-800',
+  aviso: 'border-amber-200 bg-amber-50 text-amber-900',
+};
+---
+
+<div
+  role={tipo === 'error' ? 'alert' : 'status'}
+  class:list={['no-print rounded-lg border px-4 py-3 text-[15px]', estilos[tipo]]}
+>
+  <slot />
+</div>

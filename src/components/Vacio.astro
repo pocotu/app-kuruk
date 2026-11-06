@@ -1,0 +1,11 @@
+---
+// Estado vacío: un mensaje y, opcionalmente, una acción en el slot.
+interface Props {
+  mensaje: string;
+}
+---
+
+<div class="card flex flex-col items-center gap-4 border-dashed px-6 py-14 text-center">
+  <p class="text-[15px] text-stone-600">{Astro.props.mensaje}</p>
+  <slot />
+</div>

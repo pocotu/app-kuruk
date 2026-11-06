@@ -1,17 +1,23 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 
-import db from '@astrojs/db';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  integrations: [db()],
+
+  env: {
+    schema: {
+      API_URL: envField.string({ context: 'server', access: 'secret', url: true }),
+    },
+  },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    // No vigilar la salida del build: solo genera ruido y consume vigilantes de archivos.
+    server: { watch: { ignored: ['**/.vercel/**', '**/dist/**'] } }
   },
 
   adapter: vercel()

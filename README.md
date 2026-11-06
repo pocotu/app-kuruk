@@ -1,43 +1,27 @@
-# Astro Starter Kit: Minimal
+# app-kuruk — Frontend
 
+Pantallas de KURUK (Astro SSR + Tailwind). No tiene base de datos: todos los datos salen de **api-kuruk**.
+
+## Cómo funciona
+- `src/lib/api.ts`: cliente de la API. Envía el token de sesión (cookie `httpOnly`) como `Authorization: Bearer`. El navegador nunca llama directo a la API.
+- `src/middleware.ts`: carga el usuario con `GET /auth/me`, envía a `/login` a quien no tiene sesión y bloquea `/gestion` a quien no es Administrador.
+- Cada página procesa su propio formulario (`POST` a la misma URL) y muestra los errores que devuelve la API junto a cada campo.
+
+## Uso en local
 ```sh
-pnpm create astro@latest -- --template minimal
+pnpm install
+cp .env.example .env      # API_URL=http://localhost:3001
+pnpm dev                  # http://localhost:4321 (api-kuruk debe estar corriendo)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Comandos
+| Comando | Qué hace |
+|---|---|
+| `pnpm dev` | Servidor de desarrollo |
+| `pnpm astro check` | Revisión de tipos |
+| `pnpm build` | Build para Vercel |
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Variables de entorno
+| Variable | Ejemplo |
+|---|---|
+| `API_URL` | `https://api-kuruk.vercel.app` |

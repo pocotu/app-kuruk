@@ -1,0 +1,73 @@
+---
+import type { Producto } from '../lib/api';
+import { codigoProducto, formatearSoles } from '../lib/formato';
+import Aviso from './Aviso.astro';
+import Campo from './Campo.astro';
+
+// Formulario de comprobante, compartido por "nuevo" y "editar" (detalle).
+interface Props {
+  productos: Producto[];
+  valores: { dni_ruc: string; nombre_cliente: string; producto_id: string; cantidad: string };
+  errores: Record<string, string>;
+  error: string | null;
+  boton: string;
+  cancelar: string;
+  action?: string;
+  accion?: string;
+}
+
+const { productos, valores, errores, error, boton, cancelar, action, accion } = Astro.props;
+
+const opciones = [
+  { value: '', label: 'Elige un producto' },
+  ...productos.map((p) => ({
+    value: String(p.id),
+    label: `${p.nombre} · ${formatearSoles(p.precio)} · ${p.stock} en stock (${codigoProducto(p.id)})`,
+    attrs: { 'data-precio': p.precio },
+  })),
+];
+---
+
+<form method="POST" action={action} novalidate class="card space-y-5 p-5 sm:p-6" data-form-comprobante>
+  {accion && <input type="hidden" name="accion" value={accion} />}
+  {error && <Aviso tipo="error">{error}</Aviso>}
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <Campo etiqueta="DNI o RUC" name="dni_ruc" inputmode="numeric" autocomplete="off" required value={valores.dni_ruc} error={errores.dni_ruc} ayuda="8 dígitos (DNI) u 11 (RUC)." />
+    <Campo etiqueta="Cliente" name="nombre_cliente" required value={valores.nombre_cliente} error={errores.nombre_cliente} placeholder="Nombre o razón social" />
+  </div>
+
+  <Campo etiqueta="Producto" name="producto_id" required value={valores.producto_id} error={errores.producto_id} opciones={opciones} />
+  <Campo etiqueta="Cantidad" name="cantidad" type="number" inputmode="numeric" min="1" step="1" required value={valores.cantidad} error={errores.cantidad} class="sm:max-w-40" />
+
+  <div class="flex items-baseline justify-between rounded-lg bg-stone-50 px-4 py-3">
+    <span class="text-[14px] text-stone-600">Total estimado</span>
+    <output data-total class="text-xl font-semibold tabular-nums">{formatearSoles(0)}</output>
+  </div>
+
+  <div class="form-acciones">
+    <a href={cancelar} class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">{boton}</button>
+  </div>
+</form>
+
+<script>
+  import { formatearSoles } from '../lib/formato';
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-form-comprobante]')) {
+    const producto = form.querySelector<HTMLSelectElement>('[name="producto_id"]');
+    const cantidad = form.querySelector<HTMLInputElement>('[name="cantidad"]');
+    const total = form.querySelector<HTMLOutputElement>('[data-total]');
+    if (!producto || !cantidad || !total) {
+      continue;
+    }
+    const actualizar = () => {
+      const precio = Number(producto.selectedOptions[0]?.dataset.precio ?? 0);
+      const unidades = Number(cantidad.value);
+      total.textContent = formatearSoles(precio > 0 && unidades > 0 ? precio * unidades : 0);
+    };
+    producto.addEventListener('change', actualizar);
+    cantidad.addEventListener('input', actualizar);
+    actualizar();
+  }
+</script>

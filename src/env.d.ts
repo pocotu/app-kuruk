@@ -1,10 +1,11 @@
 /// <reference path="../.astro/types.d.ts" />
-import type { UsuarioSesion } from './lib/auth';
+import type { AvisoFlash, Usuario } from './lib/api';
 
 declare global {
   namespace App {
     interface Locals {
-      user: UsuarioSesion | null;
+      user: Usuario | null;
+      aviso?: AvisoFlash | null;
     }
   }
 }

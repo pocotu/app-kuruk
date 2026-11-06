@@ -1,0 +1,53 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+// Campo de formulario: etiqueta, control y error accesibles (aria-invalid / aria-describedby).
+// Con `opciones` dibuja un <select>; si no, un <input>.
+interface Opcion {
+  value: string;
+  label: string;
+  attrs?: Record<string, string | number>;
+}
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'name'> {
+  etiqueta: string;
+  name: string;
+  error?: string | undefined;
+  ayuda?: string;
+  opciones?: Opcion[];
+}
+
+const { etiqueta, name, error, ayuda, opciones, value, class: clase, ...input } = Astro.props;
+const id = `campo-${name}`;
+const control = {
+  id,
+  name,
+  class: 'input',
+  'aria-invalid': error ? ('true' as const) : undefined,
+  'aria-describedby': [error && `${id}-error`, ayuda && `${id}-ayuda`].filter(Boolean).join(' ') || undefined,
+};
+---
+
+<div class={clase}>
+  <label for={id} class="label">
+    {etiqueta}
+    {input.required && <span class="text-stone-400" aria-hidden="true"> *</span>}
+  </label>
+  <div class="mt-1.5">
+    {
+      opciones ? (
+        <select {...control} required={input.required}>
+          {opciones.map((o) => (
+            <option value={o.value} selected={o.value === String(value ?? '')} {...o.attrs}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input {...control} value={value} {...input} />
+      )
+    }
+  </div>
+  {ayuda && !error && <p id={`${id}-ayuda`} class="mt-1.5 text-[13px] text-stone-500">{ayuda}</p>}
+  {error && <p id={`${id}-error`} class="mt-1.5 text-[13px] font-medium text-red-700">{error}</p>}
+</div>

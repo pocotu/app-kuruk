@@ -1,0 +1,21 @@
+---
+// Caja de búsqueda (GET) con ícono; el slot recibe campos ocultos que deben conservarse.
+interface Props {
+  action: string;
+  name: string;
+  value: string;
+  placeholder: string;
+  etiqueta: string;
+  class?: string;
+}
+
+const { action, name, value, placeholder, etiqueta, class: clase } = Astro.props;
+---
+
+<form method="GET" action={action} role="search" class:list={['relative', clase]}>
+  <slot />
+  <svg class="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-stone-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.33 3.33a.75.75 0 1 1-1.06 1.06l-3.33-3.33A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+  </svg>
+  <input type="search" name={name} value={value} placeholder={placeholder} aria-label={etiqueta} class="input pl-11" />
+</form>

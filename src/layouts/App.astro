@@ -1,5 +1,4 @@
 ---
-import { actions } from 'astro:actions';
 import '../styles/global.css';
 
 interface Props {
@@ -7,115 +6,126 @@ interface Props {
   seccion?: 'catalogo' | 'comprobantes' | 'gestion';
 }
 
-const { titulo, seccion = 'catalogo' } = Astro.props;
-const usuario = Astro.locals.user;
-const esAdmin = usuario?.rol === 'Administrador';
+const { titulo, seccion } = Astro.props;
+const { user: usuario } = Astro.locals;
+
+const items = [
+  { id: 'catalogo', href: '/', texto: 'Catálogo', icono: 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Zm0 9.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6Zm0 9.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z' },
+  { id: 'comprobantes', href: '/comprobantes', texto: 'Comprobantes', icono: 'M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z' },
+  { id: 'gestion', href: '/gestion', texto: 'Gestión', icono: 'M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75' },
+];
+const navegacion = items.filter((item) => item.id !== 'gestion' || usuario?.rol === 'Administrador');
+
+const iniciales = usuario?.nombre
+  .split(' ')
+  .slice(0, 2)
+  .map((parte) => parte[0])
+  .join('');
 ---
 
 <!doctype html>
 <html lang="es-PE">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fafaf9" />
+    <link rel="icon" type="image/svg+xml" href="/assets/KURUK_icono.svg" />
+    <link rel="apple-touch-icon" href="/assets/KURUK_icono.png" />
+    <meta property="og:title" content={`${titulo} · KURUK`} />
+    <meta property="og:image" content={new URL('/assets/KURUK_logo.png', Astro.url)} />
     <title>{titulo} · KURUK</title>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900 pb-24">
-    <header class="no-print sticky top-0 z-20 bg-slate-900 text-white shadow-sm">
-      <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-        <a href="/" class="flex items-center gap-2 font-bold tracking-tight text-lg">
-          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-extrabold">
-            K
-          </span>
-          <span>KURUK</span>
-          <span class="hidden sm:inline text-xs font-normal text-slate-400">
-            · Mostrador Tambopata
-          </span>
+  <body class="min-h-dvh">
+    <header class="no-print sticky top-0 z-20 border-b border-stone-200 bg-white">
+      <div class="mx-auto flex h-16 max-w-5xl items-center gap-8 px-4 sm:px-6">
+        <a href="/" class="shrink-0" aria-label="KURUK, ir al catálogo">
+          <img src="/assets/KURUK_logo.svg" alt="" width="1482" height="462" class="h-8 w-auto" />
         </a>
 
         {usuario && (
-          <div class="flex items-center gap-3">
-            <div class="text-right text-xs leading-tight">
-              <p class="font-semibold text-white">{usuario.nombre}</p>
-              <p class="text-emerald-400">{usuario.rol}</p>
-            </div>
-            <form method="POST" action={actions.logout}>
-              <button
-                type="submit"
-                class="min-h-[44px] rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 active:bg-slate-600"
+        <nav aria-label="Principal" class="hidden h-full items-stretch gap-6 md:flex">
+          {
+            navegacion.map((item) => (
+              <a
+                href={item.href}
+                aria-current={seccion === item.id ? 'page' : undefined}
+                class="relative flex items-center text-[15px] font-medium text-stone-600 transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-transparent hover:text-ink aria-[current=page]:text-ink aria-[current=page]:after:bg-ink"
               >
-                Salir
-              </button>
-            </form>
-          </div>
+                {item.texto}
+              </a>
+            ))
+          }
+        </nav>
         )}
+
+        {
+          usuario && (
+            <div class="ml-auto flex items-center gap-3">
+              <div class="hidden text-right leading-tight sm:block">
+                <p class="text-[14px] font-medium">{usuario.nombre}</p>
+                <p class="text-[13px] text-stone-500">{usuario.rol}</p>
+              </div>
+              <span class="grid size-9 place-items-center rounded-full bg-stone-100 text-[13px] font-semibold text-stone-700 sm:hidden" aria-hidden="true">
+                {iniciales}
+              </span>
+              <form method="POST" action="/logout">
+                <button type="submit" class="btn btn-secondary btn-sm">Salir</button>
+              </form>
+            </div>
+          )
+        }
       </div>
     </header>
 
-    <main class="mx-auto max-w-3xl px-4 py-5">
+    <main class:list={['mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8', usuario && 'pb-28 md:pb-12']}>
       <slot />
     </main>
 
-    {usuario && (
-      <nav
-        aria-label="Navegación principal"
-        class="no-print fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white shadow-lg"
-      >
-        <div
-          class:list={[
-            'mx-auto grid max-w-3xl',
-            esAdmin ? 'grid-cols-3' : 'grid-cols-2',
-          ]}
+    {
+      usuario && (
+        <nav
+          aria-label="Principal"
+          class="no-print fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
         >
-          <a
-            href="/"
-            class:list={[
-              'flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-2 py-2 text-xs font-semibold transition-colors',
-              seccion === 'catalogo'
-                ? 'text-emerald-700 bg-emerald-50/70 border-t-2 border-emerald-600'
-                : 'text-slate-600 hover:text-slate-900',
-            ]}
-          >
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span>Catálogo</span>
-          </a>
+          <div class="flex">
+            {navegacion.map((item) => (
+              <a
+                href={item.href}
+                aria-current={seccion === item.id ? 'page' : undefined}
+                class="flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[13px] font-medium text-stone-500 transition-colors aria-[current=page]:text-ink"
+              >
+                <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={item.icono} />
+                </svg>
+                {item.texto}
+              </a>
+            ))}
+          </div>
+        </nav>
+      )
+    }
 
-          <a
-            href="/comprobantes"
-            class:list={[
-              'flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-2 py-2 text-xs font-semibold transition-colors',
-              seccion === 'comprobantes'
-                ? 'text-emerald-700 bg-emerald-50/70 border-t-2 border-emerald-600'
-                : 'text-slate-600 hover:text-slate-900',
-            ]}
-          >
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>Comprobantes</span>
-          </a>
+    <script>
+      // Evita envíos dobles y pide confirmación en las acciones marcadas con data-confirmar.
+      document.addEventListener('submit', (evento) => {
+        const form = evento.target as HTMLFormElement;
+        if (form.dataset.enviando || (form.dataset.confirmar && !confirm(form.dataset.confirmar))) {
+          evento.preventDefault();
+          return;
+        }
+        if (form.method.toLowerCase() === 'post') {
+          form.dataset.enviando = 'true';
+          form.querySelector('button[type="submit"]')?.setAttribute('aria-busy', 'true');
+        }
+      });
 
-          {esAdmin && (
-            <a
-              href="/gestion"
-              class:list={[
-                'flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-2 py-2 text-xs font-semibold transition-colors',
-                seccion === 'gestion'
-                  ? 'text-emerald-700 bg-emerald-50/70 border-t-2 border-emerald-600'
-                  : 'text-slate-600 hover:text-slate-900',
-              ]}
-            >
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>Gestión</span>
-            </a>
-          )}
-        </div>
-      </nav>
-    )}
+      // Al volver con "atrás" la página sale de la caché: se limpia el estado de envío.
+      window.addEventListener('pageshow', () => {
+        document.querySelectorAll<HTMLFormElement>('form[data-enviando]').forEach((form) => {
+          delete form.dataset.enviando;
+          form.querySelector('[aria-busy]')?.removeAttribute('aria-busy');
+        });
+      });
+    </script>
   </body>
 </html>

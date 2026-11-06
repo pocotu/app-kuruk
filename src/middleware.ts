@@ -1,25 +1,27 @@
 import { defineMiddleware } from 'astro:middleware';
-import { validarSesion } from './lib/auth';
+import { api, avisar, borrarSesion, tieneSesion, tomarAviso, type Usuario } from './lib/api';
 
 export const onRequest = defineMiddleware(async function (context, next) {
   const { pathname } = context.url;
 
-  if (pathname.startsWith('/_astro')) {
+  // Cerrar sesión no necesita saber quién es el usuario.
+  if (pathname === '/logout') {
     return next();
   }
 
-  const usuario = await validarSesion(context.cookies);
+  let usuario: Usuario | null = null;
+  if (tieneSesion(context.cookies)) {
+    const r = await api<Usuario>(context.cookies, 'GET', '/auth/me');
+    if (r.ok) {
+      usuario = r.data;
+    } else if (r.status === 401) {
+      borrarSesion(context.cookies);
+    }
+  }
   context.locals.user = usuario;
 
-  if (pathname.startsWith('/_actions')) {
-    return next();
-  }
-
   if (pathname === '/login') {
-    if (usuario) {
-      return context.redirect('/');
-    }
-    return next();
+    return usuario ? context.redirect('/') : next();
   }
 
   if (!usuario) {
@@ -27,8 +29,10 @@ export const onRequest = defineMiddleware(async function (context, next) {
   }
 
   if (pathname.startsWith('/gestion') && usuario.rol !== 'Administrador') {
-    return context.redirect('/?error=acceso_denegado');
+    avisar(context.cookies, 'Solo el Administrador puede entrar a Gestión.', 'aviso');
+    return context.redirect('/');
   }
 
+  context.locals.aviso = tomarAviso(context.cookies);
   return next();
 });

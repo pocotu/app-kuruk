@@ -1,0 +1,15 @@
+---
+import type { Producto } from '../lib/api';
+import { estadoStock } from '../lib/formato';
+
+interface Props {
+  producto: Pick<Producto, 'stock' | 'nivel_stock'>;
+}
+
+const { texto, punto, tono } = estadoStock(Astro.props.producto);
+---
+
+<span class:list={['inline-flex items-center gap-1.5 text-[14px] font-medium', tono]}>
+  <span class:list={['size-2 rounded-full', punto]} aria-hidden="true"></span>
+  {texto}
+</span>

@@ -1,0 +1,37 @@
+---
+import Aviso from './Aviso.astro';
+
+// Encabezado de pantalla: aviso pendiente (flash), enlace de regreso opcional, título, descripción y acciones (slot).
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  volver?: { href: string; texto: string };
+}
+
+const { titulo, descripcion, volver } = Astro.props;
+const { aviso } = Astro.locals;
+---
+
+<div class="no-print mb-6">
+  {aviso && <div class="mb-6"><Aviso tipo={aviso.tipo}>{aviso.texto}</Aviso></div>}
+  {
+    volver && (
+      <a
+        href={volver.href}
+        class="mb-3 inline-flex h-9 items-center gap-1.5 text-[14px] font-medium text-stone-600 transition-colors hover:text-ink"
+      >
+        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M12.8 4.2a.75.75 0 0 1 0 1.06L8.06 10l4.74 4.74a.75.75 0 1 1-1.06 1.06l-5.27-5.27a.75.75 0 0 1 0-1.06l5.27-5.27a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+        </svg>
+        {volver.texto}
+      </a>
+    )
+  }
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">{titulo}</h1>
+      {descripcion && <p class="mt-1 text-[15px] text-stone-600">{descripcion}</p>}
+    </div>
+    {Astro.slots.has('default') && <div class="grid gap-2 sm:flex"><slot /></div>}
+  </div>
+</div>
