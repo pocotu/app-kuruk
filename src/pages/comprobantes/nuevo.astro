@@ -27,7 +27,7 @@ const productos = (await leer<Producto[]>(Astro.cookies, '/productos')) ?? [];
   <div class="mx-auto max-w-2xl">
     <Cabecera
       titulo="Nuevo comprobante"
-      descripcion="Se guarda como pendiente; el stock se descuenta al emitirlo."
+     
       volver={{ href: '/comprobantes', texto: 'Comprobantes' }}
     />
 

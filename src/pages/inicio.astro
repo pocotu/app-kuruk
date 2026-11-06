@@ -1,0 +1,413 @@
+---
+import { Picture } from 'astro:assets';
+import mostrador from '../assets/mostrador.jpeg';
+import { formatearSoles } from '../lib/formato';
+import { soporte } from '../lib/soporte';
+import BarraContacto from '../components/BarraContacto.astro';
+import Base from '../layouts/Base.astro';
+
+// Página pública. Se genera en el build: carga aunque la API no esté disponible.
+export const prerender = true;
+
+const capitulos = [
+  { nombre: 'Catálogo', titulo: 'Precios y stock.', texto: 'Precio, stock y compatibilidad Starlink de cada equipo. Búsqueda por modelo u oferta y filtro por categoría.', etiquetas: ['Búsqueda', 'Filtro Starlink'] },
+  { nombre: 'Comprobantes', titulo: 'Pendiente, emitido o anulado.', texto: 'Cada venta se registra como pendiente y se emite al confirmarla. Si hay una devolución, el administrador la anula.', etiquetas: ['Pendiente', 'Emitido', 'Anulado'] },
+  { nombre: 'Stock', titulo: 'Stock actualizado.', texto: 'El stock baja al emitir un comprobante y se repone al anularlo.', etiquetas: ['Aviso de stock bajo'] },
+  { nombre: 'Roles', titulo: 'Vendedor y administrador.', texto: 'El vendedor registra y emite sus ventas. El administrador además gestiona productos y precios y anula comprobantes.', etiquetas: ['Vendedor', 'Administrador'] },
+  { nombre: 'WhatsApp', titulo: 'Fichas para WhatsApp.', texto: 'Copia los datos de un equipo y envíalos al cliente por chat.', etiquetas: ['Copiar ficha'] },
+];
+
+// Equipos para la demostración de venta.
+const equipos = [
+  { id: 'PROD-001', nombre: 'Samsung Galaxy S24 Ultra', precio: 4899, stock: 5 },
+  { id: 'PROD-012', nombre: 'Kit Starlink Mini', precio: 1499, stock: 6 },
+  { id: 'PROD-002', nombre: 'iPhone 15 Pro Max', precio: 5299, stock: 3 },
+];
+
+const detalles = [
+  { titulo: 'Catálogo', filas: [['Categorías', 'Celular · Conectividad · Accesorios'], ['Niveles de stock', 'En stock · Quedan pocos · Agotado'], ['Búsqueda', 'Modelo, oferta y filtro Starlink']] },
+  { titulo: 'Comprobantes', filas: [['Estados', 'Pendiente → Emitido → Anulado'], ['Cliente', 'DNI (8 dígitos) o RUC (11 dígitos)'], ['Consulta', 'Por DNI, RUC o nombre, para garantías']] },
+  { titulo: 'Seguridad', filas: [['Acceso', 'Usuario y contraseña por persona'], ['Permisos', 'Vendedor y Administrador'], ['Ventas ajenas', 'Solo lectura para otros vendedores']] },
+  { titulo: 'Mostrador', filas: [['Dispositivos', 'Celular, tablet y laptop'], ['Impresión', 'Comprobante con la marca de la tienda'], ['Instalación', 'No requiere; funciona en el navegador']] },
+];
+---
+
+<Base titulo="KURUK · Sistema de ventas" oscuro>
+    <header class="fixed inset-x-0 top-0 z-30">
+      <BarraContacto ancho="max-w-6xl" />
+      <div class="px-3 pt-3 sm:px-6 sm:pt-4">
+        <nav class="mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border border-white/10 bg-noche/80 pl-4 pr-2 backdrop-blur-md sm:h-16 sm:pl-6" aria-label="Principal">
+          <a href="#arriba" class="flex items-center gap-3" aria-label="KURUK, volver arriba">
+            <span class="text-[19px] font-bold tracking-tight">KURUK</span>
+            <span class="hidden border-l border-white/20 pl-3 text-[12px] font-semibold tracking-[0.12em] text-stone-400 sm:block">TAMBOPATA</span>
+          </a>
+          <div class="hidden items-center gap-7 text-[14px] text-stone-300 md:flex">
+            <a href="#sistema" class="transition-colors hover:text-crema">Funciones</a>
+            <a href="#venta" class="transition-colors hover:text-crema">Demostración</a>
+            <a href="#detalles" class="transition-colors hover:text-crema">Especificaciones</a>
+            <a href="#soporte" class="transition-colors hover:text-crema">Contacto</a>
+          </div>
+          <a href="/login" class="flex h-10 items-center gap-2 rounded-xl border border-white/15 px-4 text-[14px] font-semibold transition-colors hover:bg-white/5">
+            Ingresar <span aria-hidden="true">↗</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="arriba" class="overflow-x-clip">
+      <section class="relative mx-auto max-w-6xl px-4 pb-16 pt-36 sm:px-6 sm:pt-40">
+        <p class="fantasma pointer-events-none absolute inset-x-0 top-40 select-none text-center text-[26vw] font-bold leading-none tracking-[-0.06em] text-white/[0.035] lg:text-[18rem]" aria-hidden="true">KURUK</p>
+
+        <div class="relative grid items-center gap-12 lg:mt-6 lg:grid-cols-[1.05fr_1fr]">
+          <div>
+            <p class="sube flex items-center gap-2 text-[12px] font-semibold tracking-[0.14em] text-stone-300" style="--i:0">
+              <span class="size-1.5 rounded-full bg-accent"></span> SISTEMA DE VENTAS
+            </p>
+            <h1 class="mt-5 text-[clamp(2.6rem,6.5vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.045em]">
+              <span class="linea"><span style="--i:1">Ventas, stock y</span></span>
+              <span class="linea"><span style="--i:2">comprobantes</span></span>
+              <span class="linea"><span style="--i:3" class="text-stone-500">en un lugar.</span></span>
+            </h1>
+            <div class="sube" style="--i:4">
+              <p class="mt-7 max-w-md text-[17px] leading-relaxed text-stone-300">
+                Para la tienda de smartphones y equipos Starlink en Tambopata.
+              </p>
+              <div class="mt-8 flex flex-wrap items-center gap-5">
+                <a href="/login" class="flex h-13 items-center gap-3 rounded-xl bg-crema px-6 text-[15px] font-semibold text-noche transition-[translate,background-color] duration-150 ease-ui hover:-translate-y-px hover:bg-white">
+                  Ingresar <span aria-hidden="true">↗</span>
+                </a>
+                <a href="#sistema" class="flex items-center gap-2 text-[14px] font-medium text-stone-300 transition-colors hover:text-crema">
+                  Ver funciones <span aria-hidden="true">↓</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <figure class="foto relative overflow-hidden rounded-3xl border border-white/10">
+            <Picture
+              src={mostrador}
+              formats={['avif', 'webp']}
+              widths={[480, 800, 1018]}
+              sizes="(min-width: 1024px) 540px, 100vw"
+              alt="Vendedor atendiendo a un cliente en el mostrador de la tienda"
+              class="aspect-[4/5] w-full object-cover"
+              loading="eager"
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section id="sistema" class="scroll-mt-32 border-t border-white/10 bg-noche-suave" data-capitulos>
+        <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+          <p class="text-[11px] font-semibold tracking-[0.16em] text-stone-500">FUNCIONES</p>
+          <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-5" role="tablist" aria-label="Funciones">
+            {capitulos.map((c, i) => (
+              <button type="button" role="tab" id={`tab-${i}`} aria-controls={`cap-${i}`} aria-selected={i === 0 ? 'true' : 'false'} class="tab group text-left" data-tab={i}>
+                <span class="flex gap-2 text-[14px] text-stone-500 transition-colors group-aria-selected:text-crema">
+                  <span class="text-accent-claro">{String(i + 1).padStart(2, '0')}</span>{c.nombre}
+                </span>
+                <span class="mt-3 block h-0.5 overflow-hidden rounded bg-white/10"><span class="progreso block h-full w-0 bg-accent-claro"></span></span>
+              </button>
+            ))}
+          </div>
+          {capitulos.map((c, i) => (
+            <div id={`cap-${i}`} role="tabpanel" aria-labelledby={`tab-${i}`} hidden={i !== 0} class="panel mt-14 grid gap-8 sm:mt-20 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+              <h2 class="text-[clamp(2.5rem,7vw,5.5rem)] font-bold uppercase leading-[0.92] tracking-[-0.045em]">{c.titulo}</h2>
+              <div>
+                <p class="text-[17px] leading-relaxed text-stone-300">{c.texto}</p>
+                <p class="mt-6 flex flex-wrap gap-2">
+                  {c.etiquetas.map((e) => <span class="rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-semibold tracking-[0.08em] text-stone-300">{e.toUpperCase()}</span>)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="venta" class="scroll-mt-32 border-t border-white/10" data-venta>
+        <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-2">
+          <div>
+            <p class="text-[11px] font-semibold tracking-[0.16em] text-accent-claro">DEMOSTRACIÓN</p>
+            <h2 class="mt-4 text-[clamp(2.5rem,6vw,4.5rem)] font-bold uppercase leading-[0.92] tracking-[-0.045em]">Registra<br />una venta.</h2>
+            <p class="mt-5 max-w-md text-[16px] text-stone-400">Los datos de esta demostración no se guardan.</p>
+
+            <fieldset class="mt-10">
+              <legend class="flex w-full justify-between text-[14px] font-medium">Elige un equipo</legend>
+              <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                {equipos.map((e, i) => (
+                  <label class="equipo cursor-pointer rounded-2xl border border-white/10 p-4 transition-colors hover:border-white/25 has-[:checked]:border-accent-claro has-[:checked]:bg-accent/10">
+                    <input type="radio" name="equipo" value={i} checked={i === 0} class="sr-only" data-precio={e.precio} data-stock={e.stock} data-nombre={e.nombre} data-codigo={e.id} />
+                    <span class="block font-mono text-[11px] text-stone-500">{e.id}</span>
+                    <span class="mt-2 block text-[14px] font-semibold leading-snug">{e.nombre}</span>
+                    <span class="mt-2 block text-[13px] text-stone-400">{formatearSoles(e.precio)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <div class="mt-8 flex items-end justify-between gap-6 border-t border-white/10 pt-8">
+              <div>
+                <p class="text-[13px] text-stone-400">Cantidad</p>
+                <div class="mt-2 flex h-12 items-center rounded-xl border border-white/15">
+                  <button type="button" class="grid h-full w-12 place-items-center text-xl text-stone-300 hover:text-crema disabled:opacity-30" data-menos aria-label="Quitar uno">−</button>
+                  <output class="w-8 text-center tabular-nums" data-cantidad>1</output>
+                  <button type="button" class="grid h-full w-12 place-items-center text-xl text-stone-300 hover:text-crema disabled:opacity-30" data-mas aria-label="Agregar uno">+</button>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-[12px] text-stone-400">Total</p>
+                <p class="text-[clamp(2rem,5vw,2.75rem)] font-bold tabular-nums tracking-tight" data-total aria-live="polite">{formatearSoles(equipos[0]!.precio)}</p>
+              </div>
+            </div>
+
+            <button type="button" class="mt-6 flex h-14 w-full items-center justify-between rounded-xl bg-crema px-5 text-[15px] font-semibold text-noche transition-[translate,background-color] duration-150 ease-ui hover:-translate-y-px hover:bg-white disabled:pointer-events-none disabled:opacity-40" data-registrar>
+              <span data-registrar-texto>Registrar comprobante</span> <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" class="mt-3 h-14 w-full rounded-xl border border-white/15 text-[15px] font-semibold transition-colors hover:bg-white/5 disabled:pointer-events-none disabled:opacity-40" data-emitir disabled>
+              Emitir comprobante
+            </button>
+          </div>
+
+          <div class="lg:pt-24">
+            <article class="rounded-3xl bg-crema p-6 text-noche shadow-2xl shadow-black/40 sm:p-8">
+              <header class="flex items-start justify-between gap-4 border-b border-stone-300 pb-5">
+                <div>
+                  <img src="/assets/KURUK_logo.svg" alt="KURUK" width="1482" height="462" class="h-8 w-auto" />
+                  <p class="mt-3 font-mono text-lg font-medium">VTA-1024</p>
+                </div>
+                <span class="rounded-full bg-stone-200 px-3 py-1 text-[13px] font-semibold text-stone-600 transition-colors" data-estado>Borrador</span>
+              </header>
+              <dl class="grid grid-cols-2 gap-4 border-b border-stone-300 py-5 text-[14px]">
+                <div><dt class="text-[12px] text-stone-500">Cliente</dt><dd class="mt-0.5 font-medium">Rosa Mamani</dd></div>
+                <div><dt class="text-[12px] text-stone-500">DNI</dt><dd class="mt-0.5 font-medium tabular-nums">45896231</dd></div>
+              </dl>
+              <div class="flex items-start justify-between gap-4 py-5">
+                <div>
+                  <p class="font-medium" data-ticket-nombre>{equipos[0]!.nombre}</p>
+                  <p class="mt-0.5 text-[13px] text-stone-500"><span class="font-mono" data-ticket-codigo>{equipos[0]!.id}</span> · <span data-ticket-detalle>1 × {formatearSoles(equipos[0]!.precio)}</span></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[12px] text-stone-500">Stock</p>
+                  <p class="text-2xl font-bold tabular-nums" data-ticket-stock>{equipos[0]!.stock}</p>
+                </div>
+              </div>
+              <footer class="flex items-baseline justify-between border-t border-stone-300 pt-5">
+                <span class="text-[14px] text-stone-500">Total</span>
+                <span class="text-3xl font-bold tabular-nums tracking-tight" data-ticket-total>{formatearSoles(equipos[0]!.precio)}</span>
+              </footer>
+            </article>
+            <p class="mt-4 text-center text-[13px] text-stone-500" data-ayuda>Elige un equipo y registra el comprobante.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="detalles" class="scroll-mt-32 border-t border-white/10 bg-noche-suave">
+        <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[1fr_1.2fr]">
+          <div>
+            <p class="text-[11px] font-semibold tracking-[0.16em] text-accent-claro">ESPECIFICACIONES</p>
+            <h2 class="mt-4 text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">Especificaciones</h2>
+          </div>
+          <div class="border-t border-white/10">
+            {detalles.map((d, i) => (
+              <details class="group border-b border-white/10" open={i === 0}>
+                <summary class="flex cursor-pointer list-none items-center gap-5 py-6 [&::-webkit-details-marker]:hidden">
+                  <span class="font-mono text-[12px] text-stone-500">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="flex-1 text-[clamp(1.4rem,3vw,1.9rem)] font-semibold tracking-tight">{d.titulo}</span>
+                  <span class="text-stone-400 transition-transform duration-200 group-open:rotate-45" aria-hidden="true">+</span>
+                </summary>
+                <dl class="pb-6 pl-9">
+                  {d.filas.map(([k, v]) => (
+                    <div class="flex justify-between gap-6 border-t border-white/5 py-3 text-[14px]">
+                      <dt class="text-stone-400">{k}</dt>
+                      <dd class="text-right">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="border-t border-white/10">
+        <a href="/login" class="group mx-auto flex max-w-6xl flex-col gap-8 px-4 py-20 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-28">
+          <span class="text-[clamp(3rem,10vw,8rem)] font-bold uppercase leading-[0.88] tracking-[-0.05em] transition-colors duration-300 group-hover:text-accent-claro">Ingresar al<br />sistema.</span>
+          <span class="grid size-20 shrink-0 place-items-center rounded-2xl bg-crema text-3xl text-noche transition-[rotate,background-color] duration-300 ease-ui group-hover:-rotate-45 group-hover:bg-white sm:size-28" aria-hidden="true">→</span>
+        </a>
+      </section>
+    </main>
+
+    <footer id="soporte" class="scroll-mt-32 border-t border-white/10 bg-noche-suave">
+      <div class="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1fr_1.4fr] lg:items-end">
+        <div>
+          <p class="text-[11px] font-semibold tracking-[0.16em] text-accent-claro">CONTACTO</p>
+          <h2 class="mt-4 text-[clamp(2.25rem,5vw,3.75rem)] font-bold uppercase leading-[0.92] tracking-[-0.045em]">Soporte</h2>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a href={soporte.whatsapp} target="_blank" rel="noopener" class="group rounded-2xl border border-white/10 p-6 transition-colors hover:border-white/25 hover:bg-white/5">
+            <span class="flex justify-between text-[11px] font-semibold tracking-[0.16em] text-stone-500">WHATSAPP <span aria-hidden="true" class="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span></span>
+            <span class="mt-6 block text-[clamp(1.5rem,3vw,2rem)] font-bold tabular-nums tracking-tight">{soporte.telefono}</span>
+            <span class="mt-1 block text-[13px] text-stone-400">Mensajes y llamadas</span>
+          </a>
+          <a href={soporte.mailto} class="group rounded-2xl border border-white/10 p-6 transition-colors hover:border-white/25 hover:bg-white/5">
+            <span class="flex justify-between text-[11px] font-semibold tracking-[0.16em] text-stone-500">CORREO <span aria-hidden="true" class="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span></span>
+            <span class="mt-6 block break-all text-[clamp(1.1rem,2.2vw,1.35rem)] font-bold tracking-tight">{soporte.email}</span>
+          </a>
+        </div>
+      </div>
+      <div class="mx-auto flex max-w-6xl flex-col gap-2 border-t border-white/10 px-4 py-8 text-[13px] text-stone-500 sm:flex-row sm:justify-between sm:px-6">
+        <span class="font-bold tracking-tight text-stone-300">KURUK</span>
+        <span>Smartphones y equipos Starlink · Tambopata, Madre de Dios</span>
+      </div>
+    </footer>
+  </Base>
+
+    <style>
+      /* Entrada del titular: cada línea sube desde su propia máscara. */
+      .linea {
+        display: block;
+        overflow: hidden;
+        padding-bottom: 0.04em;
+      }
+      .linea > span,
+      .sube {
+        display: block;
+        animation: subir 900ms var(--ease-ui) both;
+        animation-delay: calc(var(--i) * 90ms);
+      }
+      @keyframes subir {
+        from {
+          opacity: 0;
+          transform: translateY(105%);
+        }
+      }
+
+      .foto {
+        animation: aparecer 1200ms var(--ease-ui) 300ms both;
+      }
+      @keyframes aparecer {
+        from {
+          opacity: 0;
+          scale: 0.96;
+        }
+      }
+
+      /* La palabra fantasma se desplaza un poco con el scroll, donde el navegador lo permita. */
+      @supports (animation-timeline: scroll()) {
+        .fantasma {
+          animation: deriva linear both;
+          animation-timeline: scroll();
+          animation-range: 0 80vh;
+        }
+        @keyframes deriva {
+          to {
+            translate: 0 12vh;
+            opacity: 0.4;
+          }
+        }
+      }
+
+      /* Barra del capítulo activo: se llena en el tiempo que dura el capítulo. */
+      .tab[aria-selected='true'] .progreso {
+        animation: llenar var(--duracion, 6s) linear forwards;
+      }
+      @keyframes llenar {
+        to {
+          width: 100%;
+        }
+      }
+      .panel:not([hidden]) {
+        animation: aparecer 600ms var(--ease-ui) both;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .linea > span,
+        .sube,
+        .foto,
+        .fantasma,
+        .panel:not([hidden]) {
+          animation: none;
+        }
+        .tab[aria-selected='true'] .progreso {
+          animation: none;
+          width: 100%;
+        }
+      }
+    </style>
+
+    <script>
+      import { claseBadgeEstado, formatearSoles } from '../lib/formato';
+
+      // Funciones: avanzan solas cada 6 s; un clic elige una.
+      const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+      const DURACION = 6000;
+      let actual = 0;
+      let reloj: number | undefined;
+
+      const mostrarCapitulo = (i: number) => {
+        actual = i;
+        tabs.forEach((t, j) => {
+          t.setAttribute('aria-selected', String(j === i));
+          document.getElementById(`cap-${j}`)?.toggleAttribute('hidden', j !== i);
+        });
+        window.clearTimeout(reloj);
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          reloj = window.setTimeout(() => mostrarCapitulo((actual + 1) % tabs.length), DURACION);
+        }
+      };
+      tabs.forEach((t, i) => t.addEventListener('click', () => mostrarCapitulo(i)));
+      mostrarCapitulo(0);
+
+      // Demostración: equipo y cantidad → comprobante Pendiente → Emitido (baja el stock).
+      const venta = document.querySelector<HTMLElement>('[data-venta]');
+      const $ = <T extends HTMLElement>(sel: string) => venta?.querySelector<T>(sel) ?? null;
+      const radios = [...(venta?.querySelectorAll<HTMLInputElement>('input[name="equipo"]') ?? [])];
+      let cantidad = 1;
+      let estado: 'Borrador' | 'Pendiente' | 'Emitido' = 'Borrador';
+
+      const pintar = () => {
+        const e = radios.find((r) => r.checked)?.dataset;
+        if (!e) return;
+        const precio = Number(e.precio);
+        const stock = Number(e.stock);
+        cantidad = Math.min(cantidad, stock);
+        const total = formatearSoles(precio * cantidad);
+        const textos: Record<typeof estado, string> = {
+          Borrador: 'Elige un equipo y registra el comprobante.',
+          Pendiente: 'Comprobante pendiente: el stock aún no cambia.',
+          Emitido: `Comprobante emitido: el stock pasó de ${stock} a ${stock - cantidad}.`,
+        };
+
+        $('[data-cantidad]')!.textContent = String(cantidad);
+        $('[data-total]')!.textContent = total;
+        $('[data-ticket-nombre]')!.textContent = e.nombre ?? '';
+        $('[data-ticket-codigo]')!.textContent = e.codigo ?? '';
+        $('[data-ticket-detalle]')!.textContent = `${cantidad} × ${formatearSoles(precio)}`;
+        $('[data-ticket-total]')!.textContent = total;
+        $('[data-ticket-stock]')!.textContent = String(estado === 'Emitido' ? stock - cantidad : stock);
+        $('[data-ayuda]')!.textContent = textos[estado];
+
+        const badge = $('[data-estado]')!;
+        badge.textContent = estado;
+        badge.className = `rounded-full px-3 py-1 text-[13px] font-semibold transition-colors ${estado === 'Borrador' ? 'bg-stone-200 text-stone-600' : claseBadgeEstado(estado)}`;
+
+        const editable = estado === 'Borrador';
+        radios.forEach((r) => (r.disabled = !editable));
+        $<HTMLButtonElement>('[data-menos]')!.disabled = !editable || cantidad <= 1;
+        $<HTMLButtonElement>('[data-mas]')!.disabled = !editable || cantidad >= stock;
+        $<HTMLButtonElement>('[data-registrar]')!.disabled = estado === 'Pendiente';
+        $('[data-registrar-texto]')!.textContent = estado === 'Emitido' ? 'Registrar otra venta' : 'Registrar comprobante';
+        $<HTMLButtonElement>('[data-emitir]')!.disabled = estado !== 'Pendiente';
+      };
+
+      radios.forEach((r) => r.addEventListener('change', pintar));
+      $('[data-menos]')?.addEventListener('click', () => (cantidad--, pintar()));
+      $('[data-mas]')?.addEventListener('click', () => (cantidad++, pintar()));
+      $('[data-registrar]')?.addEventListener('click', () => {
+        estado = estado === 'Emitido' ? 'Borrador' : 'Pendiente';
+        cantidad = estado === 'Borrador' ? 1 : cantidad;
+        pintar();
+      });
+      $('[data-emitir]')?.addEventListener('click', () => ((estado = 'Emitido'), pintar()));
+      pintar();
+    </script>

@@ -8,7 +8,10 @@
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --color-ink: #1c1917;
   --color-accent: #1555f6; /* azul de marca (logo KURUK) */
-  --color-accent-hover: #0f43c7;
+  --color-accent-claro: #6d8dff; /* acento legible sobre fondo oscuro (landing) */
+  --color-crema: #f1ede6;
+  --color-noche: #111214;
+  --color-noche-suave: #16171a;
   --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -29,7 +32,7 @@
 
 @layer components {
   .btn {
-    @apply inline-flex h-11 select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg px-5 text-[15px] font-medium transition-[background-color,border-color,translate,scale] duration-[140ms] ease-ui hover:-translate-y-px active:translate-y-px active:scale-[.985] active:duration-[90ms] disabled:pointer-events-none disabled:opacity-60;
+    @apply inline-flex h-11 select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 text-[15px] font-medium transition-[background-color,border-color,translate,scale] duration-[140ms] ease-ui hover:-translate-y-px active:translate-y-px active:scale-[.985] active:duration-[90ms] disabled:pointer-events-none disabled:opacity-60;
   }
 
   .btn-sm {
@@ -42,11 +45,16 @@
   }
 
   .btn-primary {
-    @apply bg-accent text-white hover:bg-accent-hover;
+    @apply bg-noche text-crema hover:bg-black;
   }
 
   .btn-secondary {
     @apply border border-stone-300 bg-white text-ink hover:border-stone-400 hover:bg-stone-100;
+  }
+
+  /* Botón secundario sobre la cabecera oscura. */
+  .btn-oscuro {
+    @apply border border-white/15 text-crema hover:bg-white/10;
   }
 
   .btn-danger {
@@ -54,12 +62,12 @@
   }
 
   .card {
-    @apply rounded-xl border border-stone-200 bg-white;
+    @apply rounded-2xl border border-stone-200 bg-white;
   }
 
   /* Tarjeta que es un enlace: sube 2px y su borde se oscurece. */
   .card-link {
-    @apply block rounded-xl border border-stone-200 bg-white transition-[translate,border-color,box-shadow] duration-[180ms] ease-ui hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-[0_8px_24px_-12px_rgb(28_25_23/0.12)];
+    @apply block rounded-2xl border border-stone-200 bg-white transition-[translate,border-color,box-shadow] duration-[180ms] ease-ui hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-[0_8px_24px_-12px_rgb(28_25_23/0.12)];
   }
 
   /* Fila de una lista dentro de una .card. */
@@ -76,7 +84,7 @@
   }
 
   .input {
-    @apply block h-12 w-full rounded-lg border border-stone-300 bg-white px-3.5 text-base text-ink transition-[border-color,box-shadow] duration-[140ms] placeholder:text-stone-400 focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/15 aria-invalid:border-red-500 aria-invalid:focus:ring-red-500/15;
+    @apply block h-12 w-full rounded-xl border border-stone-300 bg-white px-3.5 text-base text-ink transition-[border-color,box-shadow] duration-[140ms] placeholder:text-stone-400 focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/15 aria-invalid:border-red-500 aria-invalid:focus:ring-red-500/15;
   }
 
   .badge {

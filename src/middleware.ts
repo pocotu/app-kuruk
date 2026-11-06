@@ -1,11 +1,14 @@
 import { defineMiddleware } from 'astro:middleware';
 import { api, avisar, borrarSesion, tieneSesion, tomarAviso, type Usuario } from './lib/api';
 
-export const onRequest = defineMiddleware(async function (context, next) {
-  const { pathname } = context.url;
+const RUTAS_PUBLICAS = new Set(['/logout', '/inicio', '/_image']);
 
-  // Cerrar sesión no necesita saber quién es el usuario.
-  if (pathname === '/logout') {
+export const onRequest = defineMiddleware(async function (context, next) {
+  // Sin barra final: al prerenderizar, Astro pide `/inicio/`.
+  const pathname = context.url.pathname.replace(/(.)\/$/, '$1');
+
+  // Rutas que no dependen del usuario: cerrar sesión, la landing (estática) y el optimizador de imágenes de Astro.
+  if (RUTAS_PUBLICAS.has(pathname)) {
     return next();
   }
 
@@ -25,7 +28,7 @@ export const onRequest = defineMiddleware(async function (context, next) {
   }
 
   if (!usuario) {
-    return context.redirect('/login');
+    return context.redirect(pathname === '/' ? '/inicio' : '/login');
   }
 
   if (pathname.startsWith('/gestion') && usuario.rol !== 'Administrador') {

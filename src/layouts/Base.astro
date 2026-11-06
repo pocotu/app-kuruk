@@ -1,0 +1,58 @@
+---
+import '../styles/global.css';
+
+// Documento común a todas las páginas: <head>, tema y protección de formularios.
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  oscuro?: boolean;
+}
+
+const {
+  titulo,
+  descripcion = 'KURUK: catálogo con stock al día, comprobantes y control por roles para la tienda de smartphones y Starlink en Tambopata.',
+  oscuro = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es-PE" class:list={[oscuro && 'bg-noche']}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content={oscuro ? '#111214' : '#fafaf9'} />
+    <meta name="description" content={descripcion} />
+    <link rel="icon" type="image/svg+xml" href="/assets/KURUK_icono.svg" />
+    <link rel="apple-touch-icon" href="/assets/KURUK_icono.png" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:image" content={new URL('/assets/KURUK_logo.png', Astro.site ?? Astro.url)} />
+    <title>{titulo}</title>
+  </head>
+  <body class:list={['min-h-dvh', oscuro && 'bg-noche text-crema']}>
+    <slot />
+
+    <script>
+      // Evita envíos dobles y pide confirmación en las acciones marcadas con data-confirmar.
+      document.addEventListener('submit', (evento) => {
+        const form = evento.target as HTMLFormElement;
+        if (form.dataset.enviando || (form.dataset.confirmar && !confirm(form.dataset.confirmar))) {
+          evento.preventDefault();
+          return;
+        }
+        if (form.method.toLowerCase() === 'post') {
+          form.dataset.enviando = 'true';
+          form.querySelector('button[type="submit"]')?.setAttribute('aria-busy', 'true');
+        }
+      });
+
+      // Al volver con "atrás" la página sale de la caché: se limpia el estado de envío.
+      window.addEventListener('pageshow', () => {
+        document.querySelectorAll<HTMLFormElement>('form[data-enviando]').forEach((form) => {
+          delete form.dataset.enviando;
+          form.querySelector('[aria-busy]')?.removeAttribute('aria-busy');
+        });
+      });
+    </script>
+  </body>
+</html>

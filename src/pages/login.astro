@@ -1,8 +1,10 @@
 ---
+import mostrador from '../assets/mostrador.jpeg';
 import Aviso from '../components/Aviso.astro';
 import Campo from '../components/Campo.astro';
-import App from '../layouts/App.astro';
+import Base from '../layouts/Base.astro';
 import { api, guardarSesion, leerFormulario } from '../lib/api';
+import { soporte } from '../lib/soporte';
 
 let erroresCampo: Record<string, string> = {};
 let errorGeneral: string | null = null;
@@ -21,17 +23,47 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<App titulo="Iniciar sesión">
-  <div class="mx-auto max-w-sm pt-4 sm:pt-10">
-    <h1 class="text-2xl font-semibold tracking-tight">Ingresa al mostrador</h1>
-    <p class="mt-1 text-[15px] text-stone-600">Smartphones y equipos Starlink · Tambopata</p>
+<Base titulo="Iniciar sesión · KURUK">
+  <div class="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+    <section class="relative flex flex-col justify-between gap-8 overflow-hidden lg:gap-10 bg-noche p-6 text-crema sm:p-10">
+      <img src={mostrador.src} alt="" width={mostrador.width} height={mostrador.height} class="absolute inset-0 hidden size-full object-cover opacity-45 lg:block" />
+      <div class="absolute inset-0 hidden bg-gradient-to-t from-noche via-noche/60 to-noche/20 lg:block"></div>
 
-    {errorGeneral && <div class="mt-6"><Aviso tipo="error">{errorGeneral}</Aviso></div>}
+      <a href="/inicio" class="relative flex items-center gap-3">
+        <span class="text-[19px] font-bold tracking-tight">KURUK</span>
+        <span class="border-l border-white/20 pl-3 text-[11px] font-semibold tracking-[0.14em] text-stone-400">TAMBOPATA</span>
+      </a>
 
-    <form method="POST" novalidate class="mt-6 space-y-5">
-      <Campo etiqueta="Correo" name="email" type="email" autocomplete="email" required value={email} error={erroresCampo.email} />
-      <Campo etiqueta="Contraseña" name="password" type="password" autocomplete="current-password" required error={erroresCampo.password} />
-      <button type="submit" class="btn btn-primary w-full">Ingresar</button>
-    </form>
+      <div class="relative">
+        <p class="text-[clamp(2rem,6vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.045em]">
+          Smartphones<br />y Starlink.<br /><span class="text-stone-500">Tambopata.</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="flex items-center justify-center px-6 py-10 sm:px-10 sm:py-12">
+      <div class="w-full max-w-sm">
+        <h1 class="text-[clamp(1.9rem,4vw,2.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.04em]">Iniciar sesión</h1>
+
+        {errorGeneral && <div class="mt-6"><Aviso tipo="error">{errorGeneral}</Aviso></div>}
+
+        <form method="POST" novalidate class="mt-8 space-y-5">
+          <Campo etiqueta="Correo" name="email" type="email" autocomplete="email" required value={email} error={erroresCampo.email} />
+          <Campo etiqueta="Contraseña" name="password" type="password" autocomplete="current-password" required error={erroresCampo.password} />
+          <button type="submit" class="btn btn-primary h-12 w-full justify-between">
+            Ingresar <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div class="mt-10 flex items-center justify-between gap-4 border-t border-stone-200 pt-6 text-[14px]">
+          <a href="/inicio" class="inline-flex items-center gap-2 font-medium text-stone-500 transition-colors hover:text-ink">
+            <span aria-hidden="true">←</span> Volver al inicio
+          </a>
+          <a href={soporte.whatsapp} target="_blank" rel="noopener" class="text-right text-stone-500 transition-colors hover:text-ink">
+            ¿No puedes ingresar? <span class="font-semibold text-ink">Soporte ↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
-</App>
+</Base>

@@ -86,7 +86,7 @@ export async function api<T>(
       ok: false,
       status: 503,
       campos: {},
-      general: `No se pudo conectar con la API (${API_URL}). Verifica que api-kuruk esté encendida.`,
+      general: 'No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.',
     };
   }
   const json = res.status === 204 ? null : await res.json().catch(() => null);

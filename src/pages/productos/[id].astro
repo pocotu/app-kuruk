@@ -28,7 +28,7 @@ const datos = [
   { etiqueta: 'Categoría', valor: producto.categoria },
   { etiqueta: 'Código', valor: codigoProducto(producto.id) },
   { etiqueta: 'Oferta vigente', valor: producto.oferta ?? 'Sin oferta' },
-  { etiqueta: 'Starlink', valor: producto.compatible_starlink ? 'Compatible, verificado para zonas rurales' : 'No compatible' },
+  { etiqueta: 'Starlink', valor: producto.compatible_starlink ? 'Compatible' : 'No compatible' },
 ];
 ---
 

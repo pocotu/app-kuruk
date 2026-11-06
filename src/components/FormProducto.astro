@@ -40,14 +40,11 @@ const categorias = ['Celular', 'Conectividad', 'Accesorios'].map((c) => ({ value
     <Campo etiqueta="Stock" name="stock" type="number" inputmode="numeric" min="0" step="1" required value={valores.stock} error={errores.stock} />
   </div>
 
-  <Campo etiqueta="Oferta vigente" name="oferta" value={valores.oferta} ayuda="Opcional. Se muestra en el catálogo." placeholder="Ej. Case y cargador gratis" />
+  <Campo etiqueta="Oferta vigente" name="oferta" value={valores.oferta} ayuda="Opcional." placeholder="Ej. Case y cargador gratis" />
 
-  <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-stone-200 p-4 transition-colors hover:bg-stone-50">
-    <input type="checkbox" name="compatible_starlink" checked={valores.compatible_starlink} class="mt-0.5 size-5 accent-accent" />
-    <span>
-      <span class="block text-[15px] font-medium">Compatible con Starlink</span>
-      <span class="block text-[14px] text-stone-600">Muestra el distintivo verde en el catálogo.</span>
-    </span>
+  <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-stone-200 p-4 transition-colors hover:bg-stone-50">
+    <input type="checkbox" name="compatible_starlink" checked={valores.compatible_starlink} class="size-5 accent-accent" />
+    <span class="text-[15px] font-medium">Compatible con Starlink</span>
   </label>
 
   <div class="form-acciones">
