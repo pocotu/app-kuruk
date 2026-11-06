@@ -1,0 +1,181 @@
+---
+import { actions, isInputError } from 'astro:actions';
+import { db, Productos } from 'astro:db';
+import App from '../../layouts/App.astro';
+import { codigoProducto, formatearSoles } from '../../lib/formato';
+
+const resultado = Astro.getActionResult(actions.crearComprobante);
+if (resultado && !resultado.error) {
+  return Astro.redirect(`/comprobantes/${resultado.data.id}?mensaje=creado`);
+}
+
+const erroresCampo =
+  resultado?.error && isInputError(resultado.error) ? resultado.error.fields : {};
+const errorGeneral =
+  resultado?.error && !isInputError(resultado.error) ? resultado.error.message : null;
+
+const productoIdInicial = Number(Astro.url.searchParams.get('producto_id') ?? '0');
+const listaProductos = await db.select().from(Productos);
+---
+
+<App titulo="Nuevo comprobante" seccion="comprobantes">
+  <div class="mb-4">
+    <a
+      href="/comprobantes"
+      class="inline-flex min-h-[44px] items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
+    >
+      ← Volver a comprobantes
+    </a>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+    <h1 class="text-xl font-bold text-slate-900">Registrar nuevo comprobante</h1>
+    <p class="mt-1 text-xs text-slate-600">
+      Se registrará en estado <strong>Pendiente</strong>. Al emitirlo se descontará el stock.
+    </p>
+
+    {errorGeneral && (
+      <div
+        role="alert"
+        class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800"
+      >
+        {errorGeneral}
+      </div>
+    )}
+
+    <form method="POST" action={actions.crearComprobante} novalidate class="mt-5 space-y-4">
+      <div>
+        <label for="dni_ruc" class="block text-sm font-semibold text-slate-700">
+          DNI (8 dígitos) o RUC (11 dígitos) <span class="text-red-600">*</span>
+        </label>
+        <input
+          id="dni_ruc"
+          name="dni_ruc"
+          type="text"
+          inputmode="numeric"
+          required
+          placeholder="Ej. 45896231 o 20601234567"
+          class="mt-1 block min-h-[44px] w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-mono text-sm text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        />
+        {erroresCampo.dni_ruc && (
+          <p class="mt-1 text-xs font-semibold text-red-600">{erroresCampo.dni_ruc[0]}</p>
+        )}
+      </div>
+
+      <div>
+        <label for="nombre_cliente" class="block text-sm font-semibold text-slate-700">
+          Nombre o razón social del cliente <span class="text-red-600">*</span>
+        </label>
+        <input
+          id="nombre_cliente"
+          name="nombre_cliente"
+          type="text"
+          required
+          placeholder="Ej. Juan Pérez / Inversiones Tambopata"
+          class="mt-1 block min-h-[44px] w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        />
+        {erroresCampo.nombre_cliente && (
+          <p class="mt-1 text-xs font-semibold text-red-600">
+            {erroresCampo.nombre_cliente[0]}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label for="producto_id" class="block text-sm font-semibold text-slate-700">
+          Producto <span class="text-red-600">*</span>
+        </label>
+        <select
+          id="producto_id"
+          name="producto_id"
+          required
+          class="mt-1 block min-h-[44px] w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        >
+          <option value="">Selecciona un producto...</option>
+          {listaProductos.map((p) => (
+            <option
+              value={p.id}
+              data-precio={p.precio}
+              selected={p.id === productoIdInicial}
+            >
+              {codigoProducto(p.id)} · {p.nombre} — {formatearSoles(p.precio)} (Stock: {p.stock})
+            </option>
+          ))}
+        </select>
+        {erroresCampo.producto_id && (
+          <p class="mt-1 text-xs font-semibold text-red-600">{erroresCampo.producto_id[0]}</p>
+        )}
+      </div>
+
+      <div>
+        <label for="cantidad" class="block text-sm font-semibold text-slate-700">
+          Cantidad <span class="text-red-600">*</span>
+        </label>
+        <input
+          id="cantidad"
+          name="cantidad"
+          type="number"
+          min="1"
+          step="1"
+          value="1"
+          required
+          class="mt-1 block min-h-[44px] w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20"
+        />
+        {erroresCampo.cantidad && (
+          <p class="mt-1 text-xs font-semibold text-red-600">{erroresCampo.cantidad[0]}</p>
+        )}
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Monto estimado (precio × cantidad)
+          </span>
+          <span id="monto-estimado" class="text-lg font-extrabold text-slate-900">
+            S/ 0.00
+          </span>
+        </div>
+      </div>
+
+      <div class="flex gap-2.5 pt-2">
+        <button
+          type="submit"
+          class="min-h-[48px] flex-1 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-xs hover:bg-emerald-700"
+        >
+          Guardar comprobante
+        </button>
+        <a
+          href="/comprobantes"
+          class="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const selectProducto = document.querySelector<HTMLSelectElement>('#producto_id');
+    const inputCantidad = document.querySelector<HTMLInputElement>('#cantidad');
+    const spanMonto = document.querySelector<HTMLElement>('#monto-estimado');
+    const formateador = new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+    });
+
+    function actualizarMonto(): void {
+      if (!selectProducto || !inputCantidad || !spanMonto) {
+        return;
+      }
+      const opcion = selectProducto.selectedOptions[0];
+      const precio = Number(opcion?.dataset.precio ?? '0');
+      const cantidad = Number(inputCantidad.value);
+      const total = precio > 0 && cantidad > 0 ? precio * cantidad : 0;
+      spanMonto.textContent = formateador.format(total);
+    }
+
+    selectProducto?.addEventListener('change', actualizarMonto);
+    inputCantidad?.addEventListener('input', actualizarMonto);
+    actualizarMonto();
+  </script>
+</App>
